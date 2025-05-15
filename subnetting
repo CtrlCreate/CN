@@ -1,0 +1,317 @@
+🔹 1. IP Subnetting and Network Design
+We’re given:
+
+MSIS IP Range: 192.168.2.0/24
+
+MIT IP Range: 192.168.44.0/24
+
+
+✅ MSIS Subnetting (192.168.2.0/24)
+LAN           Hosts   Needed	  Nearest   Subnet	  CIDR	  Network	  Broadcast	  Usable IP Range	  Usable Hosts
+MSIS LAN A	  102	    128	      /25	   192.168.2.0	  192.168.2.127	  192.168.2.1 – 192.168.2.126	126
+MSIS LAN D	  28	    32	      /27	  192.168.2.128	  192.168.2.159	  192.168.2.129 – 192.168.2.158	30
+MSIS LAN B	  13	    16	    /28	  192.168.2.160	  192.168.2.175	  192.168.2.161 – 192.168.2.174	14
+MSIS LAN C	  6	       8	    /29	  192.168.2.176	  192.168.2.183	  192.168.2.177 – 192.168.2.182	6
+
+✅ MIT Subnetting (192.168.44.0/24)
+LAN	Hosts Needed	Nearest Subnet	CIDR	Network	Broadcast	Usable IP Range	Usable Hosts
+MIT LAN B	59	64	/26	192.168.44.0	192.168.44.63	192.168.44.1 – 192.168.44.62	62
+MIT LAN D	29	32	/27	192.168.44.64	192.168.44.95	192.168.44.65 – 192.168.44.94	30
+MIT LAN C	11	16	/28	192.168.44.96	192.168.44.111	192.168.44.97 – 192.168.44.110	14
+MIT LAN A	5	8	/29	192.168.44.112	192.168.44.119	192.168.44.113 – 192.168.44.118	6
+======================================================================================================================
+
+🔹 2. Network Diagram
+
+                        +-------------------+       +-------------------+
+                        |      Router R1    |-------|      Router R2    |
+                        +-------------------+       +-------------------+
+                          |     |     |     |         |     |     |     |
+                          |     |     |     |         |     |     |     |
+                        LAN A LAN B LAN C LAN D     LAN A LAN B LAN C LAN D
+                       (DHCP)                        
+
+MSIS: 192.168.2.0/24                 MIT: 192.168.44.0/24
+Each LAN has 2 computers.
+
+[Use colour-coded boxes for each LAN when drawing]
+
+Suggested Color Codes (for diagramming):
+MSIS LAN A (DHCP) – 🟩 Green
+
+MSIS LAN B – 🟦 Blue
+
+MSIS LAN C – 🟧 Orange
+
+MSIS LAN D – 🟪 Purple
+
+MIT LAN A – 🟥 Red
+
+MIT LAN B – 🟨 Yellow
+
+MIT LAN C – 🟫 Brown
+
+MIT LAN D – 🟤 Grey
+====================================================================================================================
+🔹 3. Notes and Configuration Considerations
+Router R1 interfaces:
+
+G0/0: 192.168.2.1 (LAN A, DHCP Server)
+
+G0/1: 192.168.2.129 (LAN D)
+
+G0/2: 192.168.2.161 (LAN B)
+
+G0/3: 192.168.2.177 (LAN C)
+
+S0/0: Connection to R2 (can use 192.168.100.1/30)
+
+Router R2 interfaces:
+
+G0/0: 192.168.44.113 (LAN A)
+
+G0/1: 192.168.44.1 (LAN B)
+
+G0/2: 192.168.44.97 (LAN C)
+
+G0/3: 192.168.44.65 (LAN D)
+
+S0/0: Connection to R1 (can use 192.168.100.2/30)
+
+DHCP Server: Located in MSIS LAN A.
+
+Assigns IPs to all MSIS hosts.
+
+Exclude router IPs via DHCP reservations.
+
+DHCP Range example: 192.168.2.2 – 192.168.2.100
+
+Static Routing between R1 and R2.
+============================================================================================================
+🔹 4. Execution Strategy (For Simulation or Lab)
+Tools:
+Cisco Packet Tracer / GNS3 / NetSim
+
+Steps:
+Create two routers: R1 and R2
+
+Create 4 switches under each router
+
+Connect 2 PCs to each switch
+
+Assign static IPs or DHCP:
+
+MSIS LAN A: DHCP-enabled
+
+Rest: Static IPs
+
+Configure routers with interfaces and IPs
+
+Connect routers with serial link, assign IP (e.g., 192.168.100.1 & 192.168.100.2 /30)
+
+Enable routing (RIP or static)
+
+Test using ping from one MSIS PC to MIT PC
+=========================================================================================================================
+✅ Summary Table of All LANs
+LAN	Network Address	Broadcast Address	First Usable	Last Usable	Usable Hosts
+MSIS LAN A	192.168.2.0	192.168.2.127	192.168.2.1	192.168.2.126	126
+MSIS LAN D	192.168.2.128	192.168.2.159	192.168.2.129	192.168.2.158	30
+MSIS LAN B	192.168.2.160	192.168.2.175	192.168.2.161	192.168.2.174	14
+MSIS LAN C	192.168.2.176	192.168.2.183	192.168.2.177	192.168.2.182	6
+MIT LAN B	192.168.44.0	192.168.44.63	192.168.44.1	192.168.44.62	62
+MIT LAN D	192.168.44.64	192.168.44.95	192.168.44.65	192.168.44.94	30
+MIT LAN C	192.168.44.96	192.168.44.111	192.168.44.97	192.168.44.110	14
+MIT LAN A	192.168.44.112	192.168.44.119	192.168.44.113	192.168.44.118	6
+
+======================================================================================================================================
+🔧 1. Router Configuration (R1 and R2)
+▶️ R1 Configuration (for MSIS)
+Interfaces and IPs:
+Interface	Connected to	IP Address	Subnet Mask
+G0/0	MSIS LAN A	192.168.2.1	255.255.255.128 (/25)
+G0/1	MSIS LAN D	192.168.2.129	255.255.255.224 (/27)
+G0/2	MSIS LAN B	192.168.2.161	255.255.255.240 (/28)
+G0/3	MSIS LAN C	192.168.2.177	255.255.255.248 (/29)
+S0/0/0	To R2	192.168.100.1	255.255.255.252 (/30)
+
+Steps:
+Go to R1 → CLI and enter the following:
+
+
+enable
+configure terminal
+
+interface gig5/0
+ip address 192.168.2.1 255.255.255.128
+no shutdown
+exit
+
+interface gig6/0
+ip address 192.168.2.129 255.255.255.224
+no shutdown
+exit
+
+interface gig7/0
+ip address 192.168.2.161 255.255.255.240
+no shutdown
+exit
+
+interface gig8/0
+ip address 192.168.2.177 255.255.255.248
+no shutdown
+exit
+
+interface gig9/0
+ip address 192.168.100.1 255.255.255.252
+no shutdown
+exit
+
+router rip
+version 2
+no auto-summary
+network 192.168.2.0
+network 192.168.100.0
+exit
+
+end
+wr
+
+▶️ R2 Configuration (for MIT)
+Interfaces and IPs:
+Interface	Connected to	IP Address	Subnet Mask
+G0/0	MIT LAN A	192.168.44.113	255.255.255.248 (/29)
+G0/1	MIT LAN B	192.168.44.1	255.255.255.192 (/26)
+G0/2	MIT LAN C	192.168.44.97	255.255.255.240 (/28)
+G0/3	MIT LAN D	192.168.44.65	255.255.255.224 (/27)
+S0/0/0	To R1	192.168.100.2	255.255.255.252 (/30)
+
+Steps:
+Go to R2 → CLI and enter the following:
+
+
+enable
+configure terminal
+
+interface gig5/0
+ip address 192.168.44.113 255.255.255.248
+no shutdown
+exit
+
+interface gig6/0
+ip address 192.168.44.1 255.255.255.192
+no shutdown
+exit
+
+interface gig7/0
+ip address 192.168.44.97 255.255.255.240
+no shutdown
+exit
+
+interface gig8/0
+ip address 192.168.44.65 255.255.255.224
+no shutdown
+exit
+
+interface gig9/0
+ip address 192.168.100.2 255.255.255.252
+no shutdown
+exit
+
+router rip
+version 2
+no auto-summary
+network 192.168.44.0
+network 192.168.100.0
+exit
+
+end
+wr
+
+⚙️ R1 Configuration – MSIS LANs
+Start from the router CLI:
+
+
+enable
+configure terminal
+
+! Exclude router IPs
+ip dhcp excluded-address 192.168.2.1 192.168.2.10
+ip dhcp excluded-address 192.168.2.129 192.168.2.130
+ip dhcp excluded-address 192.168.2.161 192.168.2.162
+ip dhcp excluded-address 192.168.2.177 192.168.2.178
+
+! Pool for MSIS LAN A (102 hosts)
+ip dhcp pool MSIS_LAN_A
+network 192.168.2.0 255.255.255.128
+default-router 192.168.2.1
+dns-server 8.8.8.8
+
+! Pool for MSIS LAN D (28 hosts)
+ip dhcp pool MSIS_LAN_D
+network 192.168.2.128 255.255.255.224
+default-router 192.168.2.129
+dns-server 8.8.8.8
+
+! Pool for MSIS LAN B (13 hosts)
+ip dhcp pool MSIS_LAN_B
+network 192.168.2.160 255.255.255.240
+default-router 192.168.2.161
+dns-server 8.8.8.8
+
+! Pool for MSIS LAN C (6 hosts)
+ip dhcp pool MSIS_LAN_C
+network 192.168.2.176 255.255.255.248
+default-router 192.168.2.177
+dns-server 8.8.8.8
+
+end
+wr
+
+⚙️ R2 Configuration – MIT LANs
+
+enable
+configure terminal
+
+! Exclude router IPs
+ip dhcp excluded-address 192.168.44.1 192.168.44.2
+ip dhcp excluded-address 192.168.44.65 192.168.44.66
+ip dhcp excluded-address 192.168.44.97 192.168.44.98
+ip dhcp excluded-address 192.168.44.113 192.168.44.114
+
+! Pool for MIT LAN B (59 hosts)
+ip dhcp pool MIT_LAN_B
+network 192.168.44.0 255.255.255.192
+default-router 192.168.44.1
+dns-server 8.8.8.8
+
+! Pool for MIT LAN D (29 hosts)
+ip dhcp pool MIT_LAN_D
+network 192.168.44.64 255.255.255.224
+default-router 192.168.44.65
+dns-server 8.8.8.8
+
+! Pool for MIT LAN C (11 hosts)
+ip dhcp pool MIT_LAN_C
+network 192.168.44.96 255.255.255.240
+default-router 192.168.44.97
+dns-server 8.8.8.8
+
+! Pool for MIT LAN A (5 hosts)
+ip dhcp pool MIT_LAN_A
+network 192.168.44.112 255.255.255.248
+default-router 192.168.44.113
+dns-server 8.8.8.8
+
+end
+wr
+
+🖥️ PC Configuration (All PCs)
+For every PC:
+
+Go to Desktop → IP Configuration
+
+Select DHCP
+
+They will now request IPs automatically from the correct router via DHCP.
+
